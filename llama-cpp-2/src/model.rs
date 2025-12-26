@@ -477,6 +477,41 @@ impl LlamaModel {
         unsafe { llama_cpp_sys_2::llama_model_is_recurrent(self.model.as_ptr()) }
     }
 
+    /// Returns whether the model contains a vision encoder that requires `llama_encode()` call.
+    ///
+    /// This is useful for detecting Vision Language Models (VLMs) like LLaVA, Moondream, Qwen2-VL, etc.
+    #[must_use]
+    pub fn has_encoder(&self) -> bool {
+        unsafe { llama_cpp_sys_2::llama_model_has_encoder(self.model.as_ptr()) }
+    }
+
+    /// Returns whether the model contains a decoder that requires `llama_decode()` call.
+    ///
+    /// For encoder-decoder models, this indicates the decoder part.
+    #[must_use]
+    pub fn has_decoder(&self) -> bool {
+        unsafe { llama_cpp_sys_2::llama_model_has_decoder(self.model.as_ptr()) }
+    }
+
+    /// Returns whether this model is a Vision Language Model (VLM).
+    ///
+    /// A VLM has either an encoder (for vision input) or decoder (for text output).
+    /// This is a convenience method combining `has_encoder()` and `has_decoder()`.
+    #[must_use]
+    pub fn is_vision_model(&self) -> bool {
+        self.has_encoder() || self.has_decoder()
+    }
+
+    /// Returns whether the model is a hybrid model (like Jamba, Granite, etc.)
+    pub fn is_hybrid(&self) -> bool {
+        unsafe { llama_cpp_sys_2::llama_model_is_hybrid(self.model.as_ptr()) }
+    }
+
+    /// Returns whether the model is a diffusion-based model (like LLaDA, Dream, etc.)
+    pub fn is_diffusion(&self) -> bool {
+        unsafe { llama_cpp_sys_2::llama_model_is_diffusion(self.model.as_ptr()) }
+    }
+
     /// Returns the number of layers within the model.
     pub fn n_layer(&self) -> u32 {
         // It's never possible for this to panic because while the API interface is defined as an int32_t,
