@@ -22,6 +22,76 @@ and in sync with [llama-cpp-2][crates.io].
 This project was created with the explict goal of staying as up to date as possible with llama.cpp, as a result it is
 dead simple, very close to raw bindings, and does not follow semver meaningfully.
 
+## VLM Support (Active Development)
+
+This fork adds Vision Language Model (VLM) support to llama-cpp-2 using llama.cpp's MTMD (Multimodal Text, Media, Data) library.
+
+### Supported Models
+
+| Model | Size | Status |
+|-------|------|--------|
+| Gemma 3 | 4B, 12B, 27B | Supported |
+| SmolVLM | 256M-2.2B | Supported |
+| Qwen2-VL | 2B, 7B | Supported |
+| Qwen2.5-VL | 3B-72B | Supported |
+| Pixtral | 12B | Supported |
+| InternVL | 1B-14B | Supported |
+| Llama 4 Scout | 17B | Supported |
+| Moondream2 | ~1.5B | Supported |
+
+### Quick Start (VLM)
+
+```rust
+use llama_cpp_2::vision::{VisionContextParams, VisionInput};
+use std::path::Path;
+
+let backend = LlamaBackend::init()?;
+let model = LlamaModel::load_from_file(
+    &backend,
+    Path::new("gemma-3-4b-it-Q4_K_M.gguf"),
+    Default::default(),
+)?;
+
+assert!(model.is_vision_model());
+
+let mut ctx = model.new_vision_context(
+    &backend,
+    VisionContextParams {
+        mmproj_path: Some("gemma-3-4b-it-mmproj-Q4_K_M.gguf".to_string()),
+        ..Default::default()
+    },
+)?;
+
+let response = ctx.run(
+    &model,
+    VisionInput::from_image_path(Path::new("image.jpg"), "Describe this image."),
+)?;
+
+println!("{}", response);
+```
+
+### VLM CLI Tool
+
+```bash
+cargo run --example vlm --features mtmd,metal -- \
+    --model model.gguf \
+    --mmproj mmproj.gguf \
+    --image photo.jpg \
+    --prompt "Describe this image."
+```
+
+### Documentation
+
+- **[VLM Implementation Guide](./VLM_IMPLEMENTATION.md)** - Technical implementation details
+- **[VLM Quick Reference](./VLM_QUICK_REFERENCE.md)** - Code snippets and usage guide
+- **[docs.rs](https://docs.rs/llama-cpp-2)** - API documentation
+
+## Documentation
+
+- **[VLM Implementation Guide](./VLM_IMPLEMENTATION.md)** - Detailed implementation notes
+- **[VLM Quick Reference](./VLM_QUICK_REFERENCE.md)** - Code snippets and checklist
+- **[docs.rs](https://docs.rs/llama-cpp-2)** - API documentation
+
 Check out the [docs.rs] for crate documentation or the [readme] for high level information about the project.
 
 ## Try it
